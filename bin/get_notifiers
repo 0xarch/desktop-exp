@@ -1,0 +1,11 @@
+#!/bin/fish
+
+set SED_EXPRESSION 's/@\/.*$//'
+
+if test "$XDG_CURRENT_DESKTOP" = "KDE"
+	set SED_EXPRESSION 's/\/StatusNotifierItem$//'
+end
+
+set CURRENT_TRAYS (qdbus6 org.kde.StatusNotifierWatcher /StatusNotifierWatcher org.kde.StatusNotifierWatcher.RegisteredStatusNotifierItems | sed $SED_EXPRESSION)
+
+printf "%s\n" $CURRENT_TRAYS
