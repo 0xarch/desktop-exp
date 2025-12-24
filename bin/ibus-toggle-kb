@@ -1,0 +1,35 @@
+#!/bin/bash
+
+# This script requires extension IBus Switcher
+
+# 11: Service unavailable
+# 12: Cannot get DebugInfo - Not Supported. See below.
+# 1: No InputContext focusing - Not Supported. I CANNOT find any method to test if any context is focused
+
+DBUS_DEST="org.gnome.Shell"
+DBUS_PATH="/org/gnome/Shell/Extensions/IbusSwitcher"
+DBUS_FNRT="org.gnome.Shell.Extensions.IbusSwitcher"
+
+if ! dbus-send --session --dest=$DBUS_DEST --type=method_call --print-reply $DBUS_PATH org.freedesktop.DBus.Peer.Ping | grep -q "method return"; then
+    exit 11
+fi
+
+INPUT_SIZE=$(dbus-send --session --dest=$DBUS_DEST --type=method_call --print-reply=literal $DBUS_PATH $DBUS_FNRT.SourceSize | awk '{print $2}')
+CURRENT_SOURCE=$(dbus-send --session --dest=$DBUS_DEST --type=method_call --print-reply=literal $DBUS_PATH $DBUS_FNRT.CurrentSource | cut -d'|' -f1)
+NEXT_SOURCE=$(( ($CURRENT_SOURCE + 1) % $INPUT_SIZE ))
+
+dbus-send --session --dest=$DBUS_DEST --type=method_call $DBUS_PATH $DBUS_FNRT.SwitchSource uint32:$NEXT_SOURCE string:""
+
+# DEBUG_INFO=$(timeout 1s dbus-send --session --print-reply --dest=org.freedesktop.IBus /controller org.fcitx.Fcitx.Controller1.DebugInfo 2>&1)
+
+# if ! echo "$DEBUG_INFO" | grep -q "string.*"; then
+#     exit 12
+# fi
+
+# if echo "$DEBUG_INFO" | grep -q "focus:1"; then
+# dbus-send --session --type=method_call --dest=$DBUS_DEST /controller org.fcitx.Fcitx.Controller1.Toggle > /dev/null 2>&1
+# dbus-send --session --type=method_call --dest=$DBUS_DEST /controller org.fcitx.Fcitx.Controller1.Refresh > /dev/null 2>&1
+    # echo "$(date %H:%M:%S) Triggered" > ~/.ibus_switch.log
+# else
+#     exit 1
+# fi
