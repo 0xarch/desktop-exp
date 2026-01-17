@@ -1,0 +1,43 @@
+#!/bin/bash
+
+screenshot_dir="$(xdg-user-dir PICTURES)/Screenshots"
+mkdir -p "$screenshot_dir"
+
+timestamp=$(date +%Y-%m-%d_%H-%M-%S)
+filename="$screenshot_dir/$timestamp.png"
+temp_file="/tmp/screenshot_$$.png"
+
+# Capture fullscreen first
+grim "$temp_file"
+
+# Show preview
+swayimg -f "$temp_file" -c info.show=no &
+swayimg_pid=$!
+
+region=$(slurp -b 00000055 -c 00FF00FF -w 2)
+slurp_exit=$?
+
+kill $swayimg_pid 2>/dev/null
+wait $swayimg_pid 2>/dev/null
+
+if [ $slurp_exit -eq 0 ] && [ -n "$region" ]; then
+    echo Slurp exited with 0.
+        echo "$region" | awk -F'[, x]' '{
+        # $1=X, $2=Y, $3=W, $4=H
+        printf "%dx%d+%d+%d", $3, $4, $1, $2
+    }' | while read crop_region; do
+        magick "$temp_file" -crop "$crop_region" +repage "$filename"
+    done
+    # magick "$temp_file" -crop "$region" +repage "$filename"
+else
+    echo Slurp exited with non-zero.
+    cp "$temp_file" "$filename"
+fi
+
+swappy -f "$filename" -o "$filename" 2>/dev/null
+
+wl-copy < "$filename" 2>/dev/null
+
+notify-send "截图已保存" "文件: $(basename "$filename")" 2>/dev/null
+
+rm -f "$temp_file"
