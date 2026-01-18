@@ -21,9 +21,11 @@ for tray in $TRAYS
     # set iconname (qdbus6 $tray /StatusNotifierItem org.freedesktop.DBus.Properties.Get org.kde.StatusNotifierItem IconName)
     # echo $iconname
     # set id (qdbus6 $tray /StatusNotifierItem org.freedesktop.DBus.Properties.Get org.kde.StatusNotifierItem Id)
-    # echo $id
-    set cmdline (cat /proc/(qdbus6 org.freedesktop.DBus /org/freedesktop/DBus org.freedesktop.DBus.GetConnectionUnixProcessID $tray)/cmdline)
-
+    echo $tray
+    set proc_id (qdbus6 org.freedesktop.DBus /org/freedesktop/DBus org.freedesktop.DBus.GetConnectionUnixProcessID "$tray")
+    echo $proc_id
+    set cmdline (cat /proc/"$proc_id"/cmdline)
+    
     # 使用 switch 判断 ACTIVE_TYPE
     switch $ACTIVE_TYPE
         case QQ
