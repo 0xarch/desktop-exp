@@ -1,15 +1,21 @@
 #!/bin/fish
 
-set SED_EXPRESSION 's/@\/.*$//'
+set cwd (dirname (status filename))
 
-if test "$XDG_CURRENT_DESKTOP" = "KDE"
-	set SED_EXPRESSION 's/\/StatusNotifierItem$//'
+set SED_EXPRESSION 's/@\/StatusNotifierItem//'
+
+if test "$XDG_CURRENT_DESKTOP" = KDE
+    set SED_EXPRESSION 's/\/StatusNotifierItem$//'
 end
 
-if test "$XDG_CURRENT_DESKTOP" = "Hyprland"
-	set SED_EXPRESSION 's/\/StatusNotifierItem$//'
+if test "$XDG_CURRENT_DESKTOP" = Hyprland
+    set SED_EXPRESSION 's/\/StatusNotifierItem$//'
 end
 
-set CURRENT_TRAYS (qdbus6 org.kde.StatusNotifierWatcher /StatusNotifierWatcher org.kde.StatusNotifierWatcher.RegisteredStatusNotifierItems | sed $SED_EXPRESSION)
+set CURRENT_TRAYS (dbus-send --session --print-reply=literal --dest=org.kde.StatusNotifierWatcher /StatusNotifierWatcher org.freedesktop.DBus.Properties.Get string:org.kde.StatusNotifierWatcher string:RegisteredStatusNotifierItems)
+
+set CURRENT_TRAYS (string trim (echo $CURRENT_TRAYS | awk '{ match($0, /\[(.*)\]/, a); print a[1] }'))
+
+set CURRENT_TRAYS (string split " " $CURRENT_TRAYS | sed $SED_EXPRESSION)
 
 printf "%s\n" $CURRENT_TRAYS

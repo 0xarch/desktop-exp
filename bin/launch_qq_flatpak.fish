@@ -2,9 +2,11 @@
 
 set has_running_qq (flatpak ps --columns=application | grep QQ)
 
+set cwd (dirname (status filename))
+
 if ! test "$has_running_qq" = ""
     echo 'Request QQ Wake'
-    exec $EXPERIENCE_DIR/bin/activate_tencent.fish QQ
+    exec $cwd/activate_tencent.fish QQ
 else
     # 如果有参数传入，传递给 Flatpak
     if set -q argv[1]
