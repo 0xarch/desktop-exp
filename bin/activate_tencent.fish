@@ -7,7 +7,8 @@
 # This script is not designed to simply use alone. You should use launch_qq.fish/launch_wechat.fish/launch_qq_flatpak.fish/launch_wechat_flatpak.fish .
 # Replace Exec in .desktop file with these scripts. They handle detections automatically.
 
-# This script is part of 0xarch's DesktopExperience project that aims to improve the experience of linux desktop users.
+# This script is part of 0xarch's DesktopExperience project that aims to 
+# improve the experience of linux desktop users.
 
 # This script is confirmed working under Wayland but untested for X11.
 
@@ -36,7 +37,7 @@ if test -z "$ACTIVE_TYPE"
     exit 1
 end
 
-# Splited out to achieve better control of different WM impl. Compatible for KDE,GNOME and Hyprland
+# Splited out to achieve better control of different WM impl. Compatible for KDE,GNOME and Hyprland. (Also part of DesktopExperience project)
 set TRAYS ($cwd/get_notifiers)
 
 if ! string length $TRAYS
@@ -55,7 +56,7 @@ for tray in $TRAYS
         case QQ
             # Detect through cmdline or cgroup (flatpak) (performs better than simply matching title, icon, id)
             if test "$cmdline" = /opt/QQ/qq || grep "com.qq.QQ" /proc/"$proc_id"/cgroup
-                # for qq and wechat they are both a bit "modern" as they use KStatusNotifier, not canonical-menu, unity-menu or other thing. Simply works.
+                # for qq and wechat they are both a bit "modern" as they use KStatusNotifier, not canonical-menu, unity-menu, xembed or other thing. Simply works.
                 dbus-send --session --type=method_call --dest=$tray /StatusNotifierItem org.kde.StatusNotifierItem.Activate int32:0 int32:0
                 exit 0
             end

@@ -1,3 +1,25 @@
 #!/bin/bash
+# fcitx5-switch - wacky glue script for fcitx5 and GNOME.
+#       This script provided the wrapper you need to fix fcitx5's
+#       Incorrect shortcut bebaviour: When GNOME is set to capture
+#       <Switch>, fcitx5 WON'T BE ABLE to get it. When not captured
+#       by GNOME, fcitx5 receives <Switch>, but GNOME also! Which means
+#       GNOME itself also acted to the key(s, sepratedly). Like default.
+#       <Switch> = Super+Space, which will cause fcitx5 toggled , and 
+#       GNOME opens its app grid(because of Super pressed). By binding 
+#       <Switch> to this script in GNOME Control Center and unset
+#       fcitx5's shortcut, The problem gets fixed. Pug-NOME
+
+# REQUIRES EXECUTABLES:
+# fcitx5-remote (Along with fcitx5 package. You don't need to install twice.)
+# pgrep
+
+# This script is part of 0xarch's DesktopExperience project that aims to 
+# improve the experience of linux desktop users.
+
+# fcitx5-remote -a : prints dbus address or returns error (fcitx5 not running)
+if ! fcitx5-remote -a > /dev/null; then
+    exit 1
+fi
 
 fcitx5-remote -t
