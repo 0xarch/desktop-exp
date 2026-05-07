@@ -1,4 +1,31 @@
 #!/bin/bash
+# budgie-screenshot -
+#       This script provides a modern process for taking a screenshot.
+#       As budgie ported itself to Wayland but with tons of problems,
+#       One of them is that the built-in screenshot operation is too simple.
+#       Also it will not first capture a STATIC* picture to choose, nor letting 
+#       you edit the captured picture. <STATIC*>: Budgie just overlay a layer on
+#       top of monitor, that you lost the specifc static frame when you pressed PrtSc.
+#       This script simulates the way how traditional Wayland-WM users (like sway,
+#       hyprland) taking a screenshot.
+
+# This script is designed for Budgie > 10.10 (Wayland age).
+# If you are using Budgie 10.9, nothing will happen as grim sliently exits.
+
+# This script is part of 0xarch's DesktopExperience project that aims to 
+# improve the experience of linux desktop users.
+
+# REQUIRES EXECUTABLES:
+# xdg-user-dir (part of xdg core package. You don't need to install twice.)
+# mkdir, cp, rm, basename (coreutils)
+# grim
+# slurp
+# swayimg
+# magick
+# awk
+# swappy
+# wl-copy
+# notify-send
 
 screenshot_dir="$(xdg-user-dir PICTURES)/Screenshots"
 mkdir -p "$screenshot_dir"
@@ -38,6 +65,6 @@ swappy -f "$filename" -o "$filename" 2>/dev/null
 
 wl-copy < "$filename" 2>/dev/null
 
-notify-send "截图已保存" "文件: $(basename "$filename")" 2>/dev/null
+notify-send "Screenshot saved." "$(basename "$filename")" 2>/dev/null
 
 rm -f "$temp_file"

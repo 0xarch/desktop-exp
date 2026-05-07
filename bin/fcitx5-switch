@@ -10,12 +10,12 @@
 #       <Switch> to this script in GNOME Control Center and unset
 #       fcitx5's shortcut, The problem gets fixed. Pug-NOME
 
+# This script is part of 0xarch's DesktopExperience project that aims to 
+# improve the experience of linux desktop users.
+
 # REQUIRES EXECUTABLES:
 # fcitx5-remote (Along with fcitx5 package. You don't need to install twice.)
 # pgrep
-
-# This script is part of 0xarch's DesktopExperience project that aims to 
-# improve the experience of linux desktop users.
 
 # fcitx5-remote -a : prints dbus address or returns error (fcitx5 not running)
 if ! fcitx5-remote -a > /dev/null; then
