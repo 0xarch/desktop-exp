@@ -1,0 +1,38 @@
+#!/bin/bash
+
+# arg: <none> or 0 or 1
+# 0 for light
+# 1 for dark
+# <none> for auto switch
+ARG=$1
+
+DARK_MODE_SIG="'prefer-dark'"
+LIGHT_MODE_SIG="'default'"
+
+function is_dark_mode_now {
+  if [ "$ARG" != "" ]; then
+    return $ARG
+  fi
+  [ "$(gsettings get org.gnome.desktop.interface color-scheme)" == "$DARK_MODE_SIG" ]
+  return $?
+}
+
+MODE=$DARK_MODE_SIG
+QT_MODE="BreezeDark"
+COSMIC_IS_DARK="true"
+
+if is_dark_mode_now; then
+  MODE=$LIGHT_MODE_SIG
+  QT_MODE="BreezeLight"
+  COSMIC_IS_DARK="false"
+fi
+
+if [ -e .config/cosmic/com.system76.CosmicTheme.Mode/v1/is_dark ]; then
+  echo $COSMIC_IS_DARK >.config/cosmic/com.system76.CosmicTheme.Mode/v1/is_dark
+fi
+if [ "$XDG_CURRENT_DESKTOP" != "umbriel" ]; then
+  gsettings set org.gnome.desktop.interface color-scheme "$MODE"
+fi
+if which plasma-apply-colorscheme; then
+  plasma-apply-colorscheme "$QT_MODE"
+fi

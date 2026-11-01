@@ -1,0 +1,7 @@
+#!/bin/fish
+
+if test "$(ibus engine)" = libpinyin
+    ibus engine xkb:us::eng
+else
+    ibus engine libpinyin
+end

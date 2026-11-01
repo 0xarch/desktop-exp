@@ -8,7 +8,7 @@ if test "$XDG_CURRENT_DESKTOP" = KDE
     set SED_EXPRESSION 's/\/StatusNotifierItem$//'
 end
 
-if test "$XDG_CURRENT_DESKTOP" = Hyprland
+if test "$XDG_CURRENT_DESKTOP" = Hyprland -o "$XDG_CURRENT_DESKTOP" = umbriel
     set SED_EXPRESSION 's/\/StatusNotifierItem$//'
 end
 

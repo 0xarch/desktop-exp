@@ -38,7 +38,7 @@ if test -z "$ACTIVE_TYPE"
 end
 
 # Splited out to achieve better control of different WM impl. Compatible for KDE,GNOME and Hyprland. (Also part of DesktopExperience project)
-set TRAYS ($cwd/get_notifiers)
+set TRAYS ($cwd/get_notifiers | string match -rv '^$')
 
 if ! string length $TRAYS
     echo "Cannot get notifier items. Check your dbus service. If get_notifiers not found, re-clone the whole repository."
@@ -49,14 +49,14 @@ for tray in $TRAYS
     set proc_id (dbus-send --session --type=method_call --print-reply=literal --dest=org.freedesktop.DBus /org/freedesktop/DBus org.freedesktop.DBus.GetConnectionUnixProcessID string:$tray | awk '{print $2}')
     set cmdline (string split0 -- (cat /proc/"$proc_id"/cmdline))
 
+    echo ":" $proc_id $cmdline
+
     # if application exited during script running or other things causing race-if, nothing needs. 
     # GUI users don't care whether a back script returns an error that is not displayed.
 
     switch $ACTIVE_TYPE
         case QQ
-            # Detect through cmdline or cgroup (flatpak) (performs better than simply matching title, icon, id)
             if test "$cmdline" = /opt/QQ/qq || grep "com.qq.QQ" /proc/"$proc_id"/cgroup
-                # for qq and wechat they are both a bit "modern" as they use KStatusNotifier, not canonical-menu, unity-menu, xembed or other thing. Simply works.
                 dbus-send --session --type=method_call --dest=$tray /StatusNotifierItem org.kde.StatusNotifierItem.Activate int32:0 int32:0
                 exit 0
             end
