@@ -21,7 +21,8 @@
 # Flatpak
 #   (Recommended for managing tencent wares)
 
-# This script does not support AppImage. They are hard to locate (as user may rename it) and squashfs is so squa-shy
+# This script does not support native AppImage for now. They are hard to locate (as user may rename it) and squashfs is so squa-shy
+# Experimental Support For QQ: You need a firejail and allow dbus-talk with tray service in linuxqq.profile to use this
 
 # REQUIRES EXECUTBALES:
 # fish >= 3.7.0
@@ -49,14 +50,11 @@ for tray in $TRAYS
     set proc_id (dbus-send --session --type=method_call --print-reply=literal --dest=org.freedesktop.DBus /org/freedesktop/DBus org.freedesktop.DBus.GetConnectionUnixProcessID string:$tray | awk '{print $2}')
     set cmdline (string split0 -- (cat /proc/"$proc_id"/cmdline))
 
-    echo ":" $proc_id $cmdline
-
-    # if application exited during script running or other things causing race-if, nothing needs. 
-    # GUI users don't care whether a back script returns an error that is not displayed.
+    # echo ":" $proc_id $cmdline
 
     switch $ACTIVE_TYPE
         case QQ
-            if test "$cmdline" = /opt/QQ/qq || grep "com.qq.QQ" /proc/"$proc_id"/cgroup
+            if test "$cmdline" = /opt/QQ/qq || test -e /proc/"$proc_id"/cwd/linuxqq.profile || grep "com.qq.QQ" /proc/"$proc_id"/cgroup
                 dbus-send --session --type=method_call --dest=$tray /StatusNotifierItem org.kde.StatusNotifierItem.Activate int32:0 int32:0
                 exit 0
             end

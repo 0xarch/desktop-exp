@@ -1,0 +1,25 @@
+#!/bin/fish
+
+# Aye! SEE ME!
+# As AppImage can be everywhere, it's impossible to
+# write a universal script for everyone
+# I assume that your QQ AppImage is at ~/Applications/AppImages/QQ.AppImage
+# which is where I put
+# You may need to copy this script and change this path to where you actually put in
+
+set QQ_PATH $HOME/Applications/AppImages/QQ.AppImage
+
+set has_running_qq (firejail --list | grep "$QQ_PATH")
+
+set cwd (dirname (status filename))
+
+if ! test "$has_running_qq" = ""
+    echo 'Request QQ Wake'
+    exec $cwd/activate_tencent.fish QQ
+else
+    if set -q argv[1]
+        exec firejail --appimage "$QQ_PATH" $argv
+    else
+        exec firejail --appimage "$QQ_PATH"
+    end
+end
