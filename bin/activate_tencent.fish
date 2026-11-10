@@ -72,7 +72,9 @@ for tray in $TRAYS
     switch $ACTIVE_TYPE
         case QQ
             # 1. native install 2. AppImage 3. Flatpak
-            if string match -ie /opt/QQ/qq "$cmdline" || firejail --list | grep "$DE_QQ_PATH" | grep (ps -p "$proc_id" -o ppid= | xargs) || grep "com.qq.QQ" /proc/"$proc_id"/cgroup
+            if string match -ie /opt/QQ/qq "$cmdline" || begin
+                    test -n "$DE_QQ_PATH" && firejail --list | grep "$DE_QQ_PATH" | grep (ps -p "$proc_id" -o ppid= | xargs)
+                end || grep "com.qq.QQ" /proc/"$proc_id"/cgroup
                 dbus-send --session --type=method_call --dest=$tray /StatusNotifierItem org.kde.StatusNotifierItem.Activate int32:0 int32:0
                 exit 0
             end
