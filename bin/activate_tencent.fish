@@ -10,24 +10,38 @@
 # This script is part of 0xarch's DesktopExperience project that aims to 
 # improve the experience of linux desktop users.
 
-# This script is confirmed working under Wayland but untested for X11.
+# Confirmed working environment:
+#   * KDE Wayland
+#   * GNOME Wayland (requires manual setup, see below)
+#   * Hyprland + Waybar
+#   * Umbriel + Noctalia
 
-# This script requires you installed & enabled "AppIndicator & KStatusNotifierItem Support" or other functionality-same extension in GNOME
-# as GNOME developers dropped tray support even with the whole dbus tray service. shit st-OME
-
-# This scripts only works with the following way you installed tencent wares:
-# Official package that puts garbage in /opt
-#   (Most user. Officially they packed them to .deb and .rpm. Arch works as they repack .deb)
+# This scripts only works with the following way you installed ten-cent-wares:
+# Official native package that puts garbage in /opt
+#   (Most user. Officially they packed them to .deb and .rpm)
 # Flatpak
-#   (Recommended for managing tencent wares)
+#   (Recommended for managing ten-cent-wares)
+# AppImage
+#   (Only for QQ. And it's experimental in a very HACKY way, you also needs to do manual setup)
 
-# This script does not support native AppImage for now. They are hard to locate (as user may rename it) and squashfs is so squa-shy
-# Experimental Support For QQ: You need a firejail and allow dbus-talk with tray service in linuxqq.profile to use this
+# AppImage Support Status:
+#   They are hard to locate (as user may rename it) and squashfs is so squa-shy
+#   Experimental Support For QQ:
+#     1. You need a firejail and allow dbus-talk with tray service in linuxqq.profile to use this
+#     2. You need to set DE_QQ_PATH to point to your QQ.AppImage, it has to be readable for this script, and launch_qq.AppImage
 
-# REQUIRES EXECUTBALES:
+# REQUIRED EXECUTBALES:
 # fish >= 3.7.0
 # dbus-send (This is part of dbus core package. You don't need to install twice.)
 # cat awk grep sed xargs
+
+# KNOWN LIMITS:
+#   * Only the first existing instance will be waken. We can't infer which instance you want if you have multiples. If you want that use your AI assistant.
+#   * WeChat AppImage is currently not supported.
+#   * May not work if your fish is built with weird options.
+
+# GNOME: This script requires you installed & enabled "AppIndicator & KStatusNotifierItem Support" or other extension providing same functionality.
+# as GNOME developers dropped tray support with the whole dbus tray service. shit-OME
 
 set ACTIVE_TYPE $argv[1]
 
@@ -52,16 +66,19 @@ for tray in $TRAYS
 
     echo ":" $proc_id $cmdline
 
+    # Firejail exposes tray through xdg-dbus-proxy so we have to
+    # locate it's parent.
+
     switch $ACTIVE_TYPE
         case QQ
             # 1. native install 2. AppImage 3. Flatpak
-            if test "$cmdline" = /opt/QQ/qq || firejail --list | grep "$DE_QQ_PATH" | grep (ps -p "$proc_id" -o ppid= | xargs) || grep "com.qq.QQ" /proc/"$proc_id"/cgroup
+            if string match -ie /opt/QQ/qq "$cmdline" || firejail --list | grep "$DE_QQ_PATH" | grep (ps -p "$proc_id" -o ppid= | xargs) || grep "com.qq.QQ" /proc/"$proc_id"/cgroup
                 dbus-send --session --type=method_call --dest=$tray /StatusNotifierItem org.kde.StatusNotifierItem.Activate int32:0 int32:0
                 exit 0
             end
         case WeChat
             # 1. native install 2. Flatpak
-            if test "$cmdline" = /opt/wechat/wechat || grep "com.tencent.WeChat" /proc/"$proc_id"/cgroup
+            if string match -ie /opt/wechat/wechat "$cmdline" || grep "com.tencent.WeChat" /proc/"$proc_id"/cgroup
                 dbus-send --session --type=method_call --dest=$tray /StatusNotifierItem org.kde.StatusNotifierItem.Activate int32:0 int32:0
                 exit 0
             end
