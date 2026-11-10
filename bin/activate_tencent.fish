@@ -27,7 +27,7 @@
 # REQUIRES EXECUTBALES:
 # fish >= 3.7.0
 # dbus-send (This is part of dbus core package. You don't need to install twice.)
-# cat awk grep sed
+# cat awk grep sed xargs
 
 set ACTIVE_TYPE $argv[1]
 
@@ -50,15 +50,17 @@ for tray in $TRAYS
     set proc_id (dbus-send --session --type=method_call --print-reply=literal --dest=org.freedesktop.DBus /org/freedesktop/DBus org.freedesktop.DBus.GetConnectionUnixProcessID string:$tray | awk '{print $2}')
     set cmdline (string split0 -- (cat /proc/"$proc_id"/cmdline))
 
-    # echo ":" $proc_id $cmdline
+    echo ":" $proc_id $cmdline
 
     switch $ACTIVE_TYPE
         case QQ
-            if test "$cmdline" = /opt/QQ/qq || test -e /proc/"$proc_id"/cwd/linuxqq.profile || grep "com.qq.QQ" /proc/"$proc_id"/cgroup
+            # 1. native install 2. AppImage 3. Flatpak
+            if test "$cmdline" = /opt/QQ/qq || firejail --list | grep "$DE_QQ_PATH" | grep (ps -p "$proc_id" -o ppid= | xargs) || grep "com.qq.QQ" /proc/"$proc_id"/cgroup
                 dbus-send --session --type=method_call --dest=$tray /StatusNotifierItem org.kde.StatusNotifierItem.Activate int32:0 int32:0
                 exit 0
             end
         case WeChat
+            # 1. native install 2. Flatpak
             if test "$cmdline" = /opt/wechat/wechat || grep "com.tencent.WeChat" /proc/"$proc_id"/cgroup
                 dbus-send --session --type=method_call --dest=$tray /StatusNotifierItem org.kde.StatusNotifierItem.Activate int32:0 int32:0
                 exit 0
